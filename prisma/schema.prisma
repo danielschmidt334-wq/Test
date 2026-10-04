@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  HR_ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AssignmentStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+  EXEMPT
+}
+
+enum TrainingCategory {
+  WORK_SAFETY
+  DATA_PROTECTION
+  COMPLIANCE
+  QMS
+  OTHER
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  users     User[]
+}
+
+model JobProfile {
+  id          String                   @id @default(cuid())
+  name        String                   @unique
+  description String?
+  users       User[]
+  competencies JobProfileCompetency[]
+  onboardingTemplates OnboardingTemplate[]
+}
+
+model User {
+  id             String     @id @default(cuid())
+  email          String     @unique
+  passwordHash   String
+  firstName      String
+  lastName       String
+  role           UserRole
+  status         UserStatus @default(ACTIVE)
+  entryDate      DateTime?
+  departmentId   String?
+  department     Department? @relation(fields: [departmentId], references: [id])
+  managerId      String?
+  manager        User?      @relation("UserManager", fields: [managerId], references: [id])
+  directReports  User[]     @relation("UserManager")
+  jobProfileId   String?
+  jobProfile     JobProfile? @relation(fields: [jobProfileId], references: [id])
+  assignments    TrainingAssignment[]
+  assignedBy     TrainingAssignment[] @relation("AssignedBy")
+  competencies   UserCompetency[]
+  onboardingInstances OnboardingInstance[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model Training {
+  id              String           @id @default(cuid())
+  title           String
+  description     String?
+  category        TrainingCategory
+  isMandatory     Boolean          @default(true)
+  intervalMonths  Int?
+  durationMinutes Int?
+  createdAt       DateTime         @default(now())
+  assignments     TrainingAssignment[]
+  onboardingSteps OnboardingTemplateStep[]
+}
+
+model TrainingAssignment {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingId   String
+  training     Training         @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  dueDate      DateTime
+  status       AssignmentStatus @default(OPEN)
+  completedAt  DateTime?
+  validUntil   DateTime?
+  assignedById String?
+  assignedBy   User?            @relation("AssignedBy", fields: [assignedById], references: [id])
+  notes        String?
+  proof        TrainingProof?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([trainingId])
+  @@index([dueDate])
+  @@index([status])
+}
+
+model TrainingProof {
+  id           String             @id @default(cuid())
+  assignmentId String             @unique
+  assignment   TrainingAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  fileName     String
+  filePath     String
+  mimeType     String?
+  uploadedAt   DateTime           @default(now())
+}
+
+model Competency {
+  id          String                 @id @default(cuid())
+  name        String                 @unique
+  description String?
+  jobTargets  JobProfileCompetency[]
+  userLevels  UserCompetency[]
+}
+
+model JobProfileCompetency {
+  id           String     @id @default(cuid())
+  jobProfileId String
+  jobProfile   JobProfile @relation(fields: [jobProfileId], references: [id], onDelete: Cascade)
+  competencyId String
+  competency   Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  targetLevel  Int
+
+  @@unique([jobProfileId, competencyId])
+}
+
+model UserCompetency {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competencyId String
+  competency   Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  actualLevel  Int
+
+  @@unique([userId, competencyId])
+}
+
+model OnboardingTemplate {
+  id           String                   @id @default(cuid())
+  name         String
+  jobProfileId String?
+  jobProfile   JobProfile?              @relation(fields: [jobProfileId], references: [id])
+  steps        OnboardingTemplateStep[]
+  instances    OnboardingInstance[]
+}
+
+model OnboardingTemplateStep {
+  id         String             @id @default(cuid())
+  templateId String
+  template   OnboardingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  sortOrder  Int
+  title      String
+  trainingId String?
+  training   Training?          @relation(fields: [trainingId], references: [id])
+  progress   OnboardingStepProgress[]
+}
+
+model OnboardingInstance {
+  id         String                    @id @default(cuid())
+  userId     String
+  user       User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId String
+  template   OnboardingTemplate        @relation(fields: [templateId], references: [id])
+  startedAt  DateTime                  @default(now())
+  completedAt DateTime?
+  stepProgress OnboardingStepProgress[]
+}
+
+model OnboardingStepProgress {
+  id         String             @id @default(cuid())
+  instanceId String
+  instance   OnboardingInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  stepId     String
+  step       OnboardingTemplateStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  done       Boolean            @default(false)
+  doneAt     DateTime?
+
+  @@unique([instanceId, stepId])
+}
