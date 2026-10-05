@@ -49,6 +49,7 @@ AGENTS.md
 CLAUDE.md
 
 /dev.db
+/.pglite
 /storage
 /src/generated/prisma
 

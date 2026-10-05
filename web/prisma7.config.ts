@@ -9,6 +9,8 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url:
+      process.env["DATABASE_URL"] ??
+      "postgresql://localhost:5432/hr_qualimatrix?schema=public",
   },
 });

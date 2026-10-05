@@ -7,7 +7,7 @@ Web-Prototyp für Pflichtschulungen, Nachweise, Qualimatrix und IATF-Audit-Expor
 ```bash
 cd web
 npm install
-npm run db:seed    # Demo-Daten (nur bei leerer DB nötig)
+npm run db:setup   # Schema + Demo-Daten (einmalig oder nach DB_RESET)
 npm run dev
 ```
 
@@ -35,7 +35,7 @@ npm run dev
 ## Technik
 
 - Next.js 16 (App Router), TypeScript, Tailwind
-- SQLite (`dev.db`) via Prisma 7 — für Produktion PostgreSQL empfohlen
+- PGlite (Ordner `.pglite/`) via Prisma 7 — läuft ohne Postgres-Server; für Produktion echtes PostgreSQL
 
 ## Projektdokumentation
 

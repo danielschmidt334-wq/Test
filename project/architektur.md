@@ -6,7 +6,7 @@
 |---------|-------------|
 | Frontend | Next.js 16 App Router, React, TypeScript, Tailwind CSS |
 | API | Next.js Route Handlers + Server Actions |
-| Daten | SQLite (`web/dev.db`) via Prisma 7 — Produktion: PostgreSQL empfohlen |
+| Daten | **PGlite** (`.pglite/`, Postgres-kompatibel, ohne DB-Server) — Produktion: PostgreSQL empfohlen |
 | Auth | JWT in Cookie, Demo-Passwort-Hash (bcrypt) |
 | Dateien | Lokaler Upload-Ordner für Schulungsnachweise |
 
