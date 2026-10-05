@@ -12,11 +12,18 @@ Stand: MVP Phase 1 (betriebsfähiges Tracking + Audit-Export) — Basis in `web/
 
 ## Phase 2 (V2) — Skalierung & Entlastung
 
+| Thema | Inhalt | Status |
+|-------|--------|--------|
+| Erinnerungen | In-App bei Frist, FK-Eskalation | **erledigt** (E-Mail offen) |
+| Wiederkehrende Schulungen | HR-Wartung: Erneuerung nach `validUntil` | **erledigt** |
+| Änderungsprotokoll | RR-04-light (`/protokoll`) | **erledigt** |
+| HR-Berichte | `/berichte`, Abteilungsauswertung | **erledigt** |
+| MA-Stammdaten | Bearbeiten / aktiv | **erledigt** |
+
+Details: [v2-funktionen.md](./v2-funktionen.md)
+
 | Thema | Inhalt | IATF-Relevanz |
 |-------|--------|----------------|
-| Erinnerungen | E-Mail/In-App bei Frist, Eskalation FK | Nachweis aktiver Überwachung |
-| Wiederkehrende Schulungen | Auto-Neu zuweisen nach Ablauf | Kompetenz 7.2 / Unterweisungen |
-| Änderungsprotokoll | RR-04-light (Wer/Wann/Was am Katalog) | Audit Trail |
 | SSO | Microsoft Entra ID | Unternehmens-IT |
 | Matrix-Verknüpfung | Abschluss → Kompetenz-Level | QM-05 |
 | Excel-Migration | Vollständiger Historien-Import | Cutover von Ist-Listen |

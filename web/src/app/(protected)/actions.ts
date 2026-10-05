@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Papa from "papaparse";
 import { AssignmentStatus, UserRole } from "@/generated/prisma/client";
+import { writeAuditLog } from "@/lib/audit-log";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -156,8 +157,19 @@ export async function completeAssignment(formData: FormData) {
     },
   });
 
+  if (session.email) {
+    await writeAuditLog({
+      actorEmail: session.email,
+      action: "ASSIGNMENT_COMPLETE",
+      entity: "TrainingAssignment",
+      entityId: assignmentId,
+      summary: training?.title ?? assignmentId,
+    });
+  }
+
   revalidatePath("/meine-schulungen");
   revalidatePath("/dashboard");
+  revalidatePath("/protokoll");
 }
 
 export async function attachProofMetadata(formData: FormData) {

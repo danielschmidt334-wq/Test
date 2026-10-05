@@ -30,13 +30,35 @@ enum TrainingType {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  role         UserRole @default(EMPLOYEE)
-  employeeId   String?  @unique
-  employee     Employee? @relation(fields: [employeeId], references: [id])
-  createdAt    DateTime @default(now())
+  id            String            @id @default(cuid())
+  email         String            @unique
+  passwordHash  String
+  role          UserRole          @default(EMPLOYEE)
+  employeeId    String?           @unique
+  employee      Employee?         @relation(fields: [employeeId], references: [id])
+  notifications AppNotification[]
+  createdAt     DateTime          @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  actorEmail String
+  action    String
+  entity    String
+  entityId  String?
+  summary   String
+}
+
+model AppNotification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
 }
 
 model Employee {

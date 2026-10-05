@@ -1,7 +1,20 @@
 import { execSync } from "node:child_process";
-import fs from "node:fs/promises";
+import fs from "node:fs";
+import fsp from "node:fs/promises";
+import path from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { resolvePgliteDataDir } from "../src/lib/pglite-data-dir";
+
+async function applyPatches(db: PGlite) {
+  const patchDir = path.join(process.cwd(), "prisma/patches");
+  if (!fs.existsSync(patchDir)) return;
+  const files = fs.readdirSync(patchDir).filter((f) => f.endsWith(".sql")).sort();
+  for (const file of files) {
+    const sql = fs.readFileSync(path.join(patchDir, file), "utf8");
+    await db.exec(sql);
+    console.log("Patch angewendet:", file);
+  }
+}
 
 async function hasSchema(db: PGlite) {
   const res = await db.query<{ exists: boolean }>(
@@ -18,14 +31,13 @@ async function main() {
   const reset = process.env.DB_RESET === "1";
 
   if (reset) {
-    await fs.rm(dir, { recursive: true, force: true });
+    await fsp.rm(dir, { recursive: true, force: true });
   }
 
   const db = new PGlite({ dataDir: dir });
   if (!reset && (await hasSchema(db))) {
-    console.log(
-      "Datenbankschema in .pglite ist bereits vorhanden. Für Neuaufbau: DB_RESET=1 npm run db:push",
-    );
+    console.log("Bestehendes Schema — wende Patches an (falls neu).");
+    await applyPatches(db);
     await db.close();
     return;
   }
@@ -36,6 +48,7 @@ async function main() {
   );
 
   await db.exec(sql);
+  await applyPatches(db);
   await db.close();
   console.log("Schema nach PGlite geschrieben:", dir);
 }

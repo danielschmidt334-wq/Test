@@ -3,7 +3,10 @@ import type { SessionUser } from "@/lib/auth";
 import { roleLabel } from "@/lib/roles";
 
 const navForRole = (session: SessionUser) => {
-  const common = [{ href: "/dashboard", label: "Übersicht" }];
+  const common = [
+    { href: "/dashboard", label: "Übersicht" },
+    { href: "/benachrichtigungen", label: "Mitteilungen" },
+  ];
   if (session.role === "EMPLOYEE") {
     return [...common, { href: "/meine-schulungen", label: "Meine Schulungen" }];
   }
@@ -21,16 +24,19 @@ const navForRole = (session: SessionUser) => {
       { href: "/schulungen", label: "Schulungen" },
       { href: "/matrix", label: "Qualimatrix" },
       { href: "/audit", label: "Audit-Export" },
+      { href: "/protokoll", label: "Protokoll" },
     ];
   }
   return [
     ...common,
+    { href: "/berichte", label: "Berichte" },
     { href: "/mitarbeitende", label: "Mitarbeitende" },
     { href: "/schulungen", label: "Schulungen" },
     { href: "/zuweisungen", label: "Zuweisungen" },
     { href: "/matrix", label: "Qualimatrix" },
     { href: "/onboarding", label: "Onboarding" },
     { href: "/audit", label: "Audit-Export" },
+    { href: "/protokoll", label: "Protokoll" },
   ];
 };
 

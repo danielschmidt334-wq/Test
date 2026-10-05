@@ -1,5 +1,6 @@
 import { PageHeader, Card } from "@/components/app-shell";
 import { importEmployeesCsv } from "@/app/(protected)/actions";
+import { updateEmployee } from "@/app/(protected)/hr-actions";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -81,7 +82,8 @@ export default async function MitarbeitendePage({
               <th className="py-2 pr-4">Abteilung</th>
               <th className="py-2 pr-4">Rolle</th>
               <th className="py-2 pr-4">FK</th>
-              <th className="py-2">Eintritt</th>
+              <th className="py-2 pr-4">Eintritt</th>
+              <th className="py-2">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -98,7 +100,51 @@ export default async function MitarbeitendePage({
                     ? `${e.manager.lastName}, ${e.manager.firstName}`
                     : "—"}
                 </td>
-                <td className="py-2 tabular-nums">{formatDate(e.startDate)}</td>
+                <td className="py-2 pr-4 tabular-nums">{formatDate(e.startDate)}</td>
+                <td className="py-2">
+                  <details>
+                    <summary className="cursor-pointer text-zinc-700">
+                      {e.active ? "Aktiv" : "Inaktiv"} · Bearbeiten
+                    </summary>
+                    <form action={updateEmployee} className="mt-2 grid gap-2 sm:grid-cols-2">
+                      <input type="hidden" name="id" value={e.id} />
+                      <label className="text-xs">
+                        Vorname
+                        <input
+                          name="firstName"
+                          defaultValue={e.firstName}
+                          className="mt-0.5 w-full rounded border px-2 py-1"
+                        />
+                      </label>
+                      <label className="text-xs">
+                        Nachname
+                        <input
+                          name="lastName"
+                          defaultValue={e.lastName}
+                          className="mt-0.5 w-full rounded border px-2 py-1"
+                        />
+                      </label>
+                      <label className="text-xs sm:col-span-2">
+                        Abteilung
+                        <input
+                          name="department"
+                          defaultValue={e.department}
+                          className="mt-0.5 w-full rounded border px-2 py-1"
+                        />
+                      </label>
+                      <label className="flex items-center gap-2 text-xs sm:col-span-2">
+                        <input name="active" type="checkbox" defaultChecked={e.active} />
+                        Aktiv im System
+                      </label>
+                      <button
+                        type="submit"
+                        className="sm:col-span-2 w-fit rounded bg-zinc-900 px-3 py-1 text-xs text-white"
+                      >
+                        Speichern
+                      </button>
+                    </form>
+                  </details>
+                </td>
               </tr>
             ))}
           </tbody>

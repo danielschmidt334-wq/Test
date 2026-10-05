@@ -26,6 +26,9 @@ async function main() {
         "/matrix",
         "/zuweisungen",
         "/onboarding",
+        "/berichte",
+        "/protokoll",
+        "/benachrichtigungen",
       ],
     },
     {

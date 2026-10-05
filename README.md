@@ -49,6 +49,7 @@ npm run dev
 - Qualimatrix-Lückenliste (Soll/Ist)
 - Onboarding-Checklisten
 - **Audit-Export** (CSV / ZIP mit Nachweisen)
+- **V2:** Mitteilungen, HR-Berichte, Änderungsprotokoll, MA bearbeiten — siehe [`project/v2-funktionen.md`](./project/v2-funktionen.md)
 - CSV-Import Mitarbeitende
 
 ## Technik
