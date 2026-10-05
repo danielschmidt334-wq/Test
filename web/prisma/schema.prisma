@@ -79,6 +79,7 @@ model Employee {
   assignments  TrainingAssignment[]
   competencies EmployeeCompetency[]
   onboardingInstances OnboardingInstance[]
+  eventEnrollments TrainingEventEnrollment[]
   createdAt    DateTime @default(now())
 }
 
@@ -99,8 +100,43 @@ model Training {
   mandatory       Boolean      @default(false)
   intervalMonths  Int?
   tags            String       @default("")
+  competencyId    String?
+  competency      Competency?  @relation(fields: [competencyId], references: [id])
   assignments     TrainingAssignment[]
   onboardingTasks OnboardingTask[]
+  events          TrainingEvent[]
+}
+
+model TrainingEvent {
+  id         String   @id @default(cuid())
+  trainingId String
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  startsAt   DateTime
+  location   String   @default("Werk — Schulungsraum")
+  capacity   Int?
+  notes      String   @default("")
+  enrollments TrainingEventEnrollment[]
+}
+
+model TrainingEventEnrollment {
+  id         String        @id @default(cuid())
+  eventId    String
+  event      TrainingEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime      @default(now())
+
+  @@unique([eventId, employeeId])
+}
+
+model EmailOutbox {
+  id        String    @id @default(cuid())
+  toEmail   String
+  subject   String
+  body      String
+  sentAt    DateTime?
+  error     String?
+  createdAt DateTime  @default(now())
 }
 
 model TrainingAssignment {
@@ -128,6 +164,7 @@ model Competency {
   category    String   @default("Allgemein")
   requirements RoleCompetencyRequirement[]
   employeeLevels EmployeeCompetency[]
+  trainings   Training[]
 }
 
 model RoleCompetencyRequirement {

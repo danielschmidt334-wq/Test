@@ -8,13 +8,18 @@ const navForRole = (session: SessionUser) => {
     { href: "/benachrichtigungen", label: "Mitteilungen" },
   ];
   if (session.role === "EMPLOYEE") {
-    return [...common, { href: "/meine-schulungen", label: "Meine Schulungen" }];
+    return [
+      ...common,
+      { href: "/meine-schulungen", label: "Meine Schulungen" },
+      { href: "/termine", label: "Termine" },
+    ];
   }
   if (session.role === "MANAGER") {
     return [
       ...common,
       { href: "/team", label: "Mein Team" },
       { href: "/meine-schulungen", label: "Meine Schulungen" },
+      { href: "/termine", label: "Termine" },
       { href: "/matrix", label: "Qualimatrix" },
     ];
   }
@@ -32,6 +37,7 @@ const navForRole = (session: SessionUser) => {
     { href: "/berichte", label: "Berichte" },
     { href: "/mitarbeitende", label: "Mitarbeitende" },
     { href: "/schulungen", label: "Schulungen" },
+    { href: "/termine", label: "Termine" },
     { href: "/zuweisungen", label: "Zuweisungen" },
     { href: "/matrix", label: "Qualimatrix" },
     { href: "/onboarding", label: "Onboarding" },

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Papa from "papaparse";
 import { AssignmentStatus, UserRole } from "@/generated/prisma/client";
+import { bumpCompetencyAfterTraining } from "@/lib/competency-sync";
 import { writeAuditLog } from "@/lib/audit-log";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -88,6 +89,66 @@ export async function importEmployeesCsv(formData: FormData) {
   );
 }
 
+export async function importTrainingHistoryCsv(formData: FormData) {
+  await requireHr();
+  const file = formData.get("file");
+  if (!(file instanceof File)) return;
+
+  const text = await file.text();
+  const parsed = Papa.parse<Record<string, string>>(text, {
+    header: true,
+    skipEmptyLines: true,
+  });
+
+  let imported = 0;
+  for (const row of parsed.data) {
+    const email = (row.email ?? row.Email ?? row["E-Mail"] ?? "").trim().toLowerCase();
+    const trainingTitle = (row.training ?? row.schulung ?? row.Schulung ?? row.title ?? "").trim();
+    if (!email || !trainingTitle) continue;
+
+    const employee = await prisma.employee.findUnique({ where: { email } });
+    const training = await prisma.training.findFirst({
+      where: { title: { equals: trainingTitle, mode: "insensitive" } },
+    });
+    if (!employee || !training) continue;
+
+    const completedAt = new Date(row.completedAt ?? row.abgeschlossen ?? row.Datum ?? Date.now());
+    let validUntil: Date | undefined;
+    if (row.validUntil ?? row.gueltigBis) {
+      validUntil = new Date(String(row.validUntil ?? row.gueltigBis));
+    } else if (training.intervalMonths) {
+      validUntil = new Date(completedAt);
+      validUntil.setMonth(validUntil.getMonth() + training.intervalMonths);
+    }
+
+    await prisma.trainingAssignment.upsert({
+      where: {
+        trainingId_employeeId: { trainingId: training.id, employeeId: employee.id },
+      },
+      create: {
+        trainingId: training.id,
+        employeeId: employee.id,
+        dueDate: completedAt,
+        status: AssignmentStatus.COMPLETED,
+        completedAt,
+        validUntil,
+      },
+      update: {
+        status: AssignmentStatus.COMPLETED,
+        completedAt,
+        validUntil,
+      },
+    });
+    await bumpCompetencyAfterTraining(employee.id, training);
+    imported += 1;
+  }
+
+  revalidatePath("/zuweisungen");
+  revalidatePath("/dashboard");
+  revalidatePath("/matrix");
+  redirect(`/zuweisungen?historyImported=${imported}`);
+}
+
 export async function bulkAssignTraining(formData: FormData) {
   await requireHr();
   const trainingId = String(formData.get("trainingId"));
@@ -140,6 +201,7 @@ export async function completeAssignment(formData: FormData) {
   const training = await prisma.training.findUnique({
     where: { id: assignment.trainingId },
   });
+  if (!training) return;
   let valid: Date | undefined;
   if (validUntilRaw) {
     valid = new Date(String(validUntilRaw));
@@ -163,11 +225,14 @@ export async function completeAssignment(formData: FormData) {
       action: "ASSIGNMENT_COMPLETE",
       entity: "TrainingAssignment",
       entityId: assignmentId,
-      summary: training?.title ?? assignmentId,
+      summary: training.title,
     });
   }
 
+  await bumpCompetencyAfterTraining(assignment.employeeId, training);
+
   revalidatePath("/meine-schulungen");
+  revalidatePath("/matrix");
   revalidatePath("/dashboard");
   revalidatePath("/protokoll");
 }

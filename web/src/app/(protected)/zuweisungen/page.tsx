@@ -1,5 +1,5 @@
 import { PageHeader, Card, Badge } from "@/components/app-shell";
-import { bulkAssignTraining } from "@/app/(protected)/actions";
+import { bulkAssignTraining, importTrainingHistoryCsv } from "@/app/(protected)/actions";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { UserRole } from "@/generated/prisma/client";
@@ -7,9 +7,14 @@ import { redirect } from "next/navigation";
 import { assignmentStatusLabel, formatDate } from "@/lib/utils";
 import { listAssignmentsForScope } from "@/lib/assignments";
 
-export default async function ZuweisungenPage() {
+export default async function ZuweisungenPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ historyImported?: string }>;
+}) {
   const session = await getSession();
   if (!session || session.role !== UserRole.HR_ADMIN) redirect("/dashboard");
+  const params = await searchParams;
 
   const [trainings, departments, assignments] = await Promise.all([
     prisma.training.findMany({ orderBy: { title: "asc" } }),
@@ -30,6 +35,27 @@ export default async function ZuweisungenPage() {
         title="Zuweisungen"
         description="Sammelzuweisung für Jahresunterweisungen (~80 MA)."
       />
+      {params.historyImported != null ? (
+        <Card className="mb-4 border-emerald-200 bg-emerald-50 text-sm text-emerald-900">
+          Historien-Import: {params.historyImported} Abschlüsse übernommen.
+        </Card>
+      ) : null}
+      <Card className="mb-6">
+        <h3 className="mb-3 text-sm font-semibold">Excel-Migration: Schulungshistorie (CSV)</h3>
+        <p className="mb-2 text-xs text-zinc-600">
+          Spalten: <code>E-Mail</code>, <code>Schulung</code> (Titel), optional{" "}
+          <code>abgeschlossen</code>, <code>gueltigBis</code>
+        </p>
+        <form action={importTrainingHistoryCsv} className="flex flex-wrap items-end gap-3">
+          <input type="file" name="file" accept=".csv" required className="text-sm" />
+          <button type="submit" className="rounded-lg border border-zinc-300 px-3 py-2 text-sm">
+            Historie importieren
+          </button>
+          <a href="/samples/historie-schulungen.csv" className="text-sm text-zinc-600 underline">
+            Beispiel-CSV
+          </a>
+        </form>
+      </Card>
       <Card className="mb-6">
         <h3 className="mb-3 text-sm font-semibold">Sammelzuweisung</h3>
         <form action={bulkAssignTraining} className="flex flex-wrap items-end gap-3">

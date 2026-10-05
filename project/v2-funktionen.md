@@ -1,28 +1,35 @@
-# V2-Funktionen (erste Ausbaustufe)
+# V2 / V2.1 — HR-Funktionen
 
-## Neu in der App
+## V2 (Basis)
 
 | Bereich | Funktion |
 |---------|----------|
-| **Mitteilungen** | In-App-Erinnerungen (Frist / überfällig), FK-Eskalation |
-| **Berichte** | HR-Wartung (Erneuerung abgelaufener Pflichtschulungen + Erinnerungen), Überfällig nach Abteilung |
-| **Protokoll** | RR-04-light Audit-Log (Katalog, MA-Stammdaten, Abschlüsse) |
-| **Mitarbeitende** | Stammdaten bearbeiten, aktiv/inaktiv |
+| **Mitteilungen** | In-App-Erinnerungen, FK-Eskalation |
+| **Berichte** | Wartung, Abteilungsauswertung |
+| **Protokoll** | RR-04-light Audit-Log |
+| **Mitarbeitende** | Bearbeiten, aktiv/inaktiv |
+
+## V2.1 (neu)
+
+| Bereich | Funktion |
+|---------|----------|
+| **Qualimatrix** | Automatischer Kompetenz-Boost nach Schulungsabschluss (Soll-Cap der Rolle) |
+| **E-Mail-Outbox** | Beim Wartungslauf werden Mails in `storage/emails/` geschrieben (SMTP vorbereitet) |
+| **Historie-Import** | CSV unter **Zuweisungen** (Excel-Migration Abschlüsse) |
+| **Termine** | Präsenztermine planen (HR), Anmeldung (MA/FK) |
 
 ## Datenbank-Update
 
-Nach `git pull`:
-
 ```bash
 cd web
-npm run db:push    # wendet prisma/patches/*.sql an
+npm run db:push
 ```
 
-Bei Problemen: `DB_RESET=1 npm run db:setup` (löscht lokale Demo-DB).
+Patches: `prisma/patches/v2-*.sql`, `v3-v21-*.sql`
 
-## Nächste Schritte (V2.1+)
+## Nächste Schritte (V2.2)
 
-- E-Mail-Versand (SMTP/Graph)
-- Entra ID SSO
-- Schulungsabschluss → Kompetenzmatrix automatisch
-- Terminplanung Präsenzschulungen
+- Entra ID SSO — siehe [002-email-und-entra.md](./entscheidungen/002-email-und-entra.md)
+- Echter SMTP/Graph-Versand
+- Kompetenz-Zuordnung im Schulungskatalog (Dropdown)
+- Kalender-Export (iCal) für Termine

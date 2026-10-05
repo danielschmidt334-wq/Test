@@ -11,6 +11,11 @@ const prisma = createPrismaClient();
 
 async function main() {
   await ensurePrismaReady();
+  await prisma.emailOutbox.deleteMany();
+  await prisma.trainingEventEnrollment.deleteMany();
+  await prisma.trainingEvent.deleteMany();
+  await prisma.appNotification.deleteMany();
+  await prisma.auditLog.deleteMany();
   await prisma.onboardingTaskProgress.deleteMany();
   await prisma.onboardingInstance.deleteMany();
   await prisma.onboardingTask.deleteMany();
@@ -178,6 +183,24 @@ async function main() {
   });
   const compSafety = await prisma.competency.create({
     data: { name: "Arbeitssicherheit", category: "Arbeitsschutz" },
+  });
+
+  await prisma.training.update({
+    where: { id: trainings[0].id },
+    data: { competencyId: compSafety.id },
+  });
+  await prisma.training.update({
+    where: { id: trainings[3].id },
+    data: { competencyId: compQuality.id },
+  });
+
+  await prisma.trainingEvent.create({
+    data: {
+      trainingId: trainings[0].id,
+      startsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      location: "Werk — Schulungsraum A",
+      capacity: 20,
+    },
   });
 
   await prisma.roleCompetencyRequirement.createMany({

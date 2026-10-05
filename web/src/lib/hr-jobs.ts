@@ -1,4 +1,5 @@
 import { AssignmentStatus } from "@/generated/prisma/client";
+import { queueEmail } from "./email-outbox";
 import { prisma } from "./prisma";
 
 /** Abgelaufene Pflichtschulungen erneut öffnen (gleiche Zuweisung, neues Fristdatum). */
@@ -80,6 +81,13 @@ export async function syncDueNotifications() {
     await prisma.appNotification.create({
       data: { userId, title, message, link },
     });
+    if (a.employee.email) {
+      await queueEmail(
+        a.employee.email,
+        `[Knauf Schulungen] ${title}`,
+        `${message}\n\nBitte im Tool unter „Meine Schulungen“ abschließen.`,
+      );
+    }
     created += 1;
 
     if (overdue && a.employee.managerId) {
