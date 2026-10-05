@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  EMPLOYEE
+  MANAGER
+  HR_ADMIN
+  QM_READONLY
+}
+
+enum AssignmentStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+  EXEMPT
+}
+
+enum TrainingType {
+  INTERNAL
+  EXTERNAL
+  E_LEARNING
+  PRESENCE
+}
+
+model User {
+  id            String            @id @default(cuid())
+  email         String            @unique
+  passwordHash  String
+  role          UserRole          @default(EMPLOYEE)
+  employeeId    String?           @unique
+  employee      Employee?         @relation(fields: [employeeId], references: [id])
+  notifications AppNotification[]
+  createdAt     DateTime          @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  actorEmail String
+  action    String
+  entity    String
+  entityId  String?
+  summary   String
+}
+
+model AppNotification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Employee {
+  id           String   @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String   @unique
+  department   String
+  location     String   @default("Werk")
+  startDate    DateTime
+  active       Boolean  @default(true)
+  jobRoleId    String?
+  jobRole      JobRole? @relation(fields: [jobRoleId], references: [id])
+  managerId    String?
+  manager      Employee?  @relation("Team", fields: [managerId], references: [id])
+  directReports Employee[] @relation("Team")
+  user         User?
+  assignments  TrainingAssignment[]
+  competencies EmployeeCompetency[]
+  onboardingInstances OnboardingInstance[]
+  eventEnrollments TrainingEventEnrollment[]
+  createdAt    DateTime @default(now())
+}
+
+model JobRole {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  employees       Employee[]
+  competencyReqs  RoleCompetencyRequirement[]
+  onboardingTemplates OnboardingTemplate[]
+}
+
+model Training {
+  id              String       @id @default(cuid())
+  title           String
+  description     String       @default("")
+  category        String
+  trainingType    TrainingType @default(INTERNAL)
+  mandatory       Boolean      @default(false)
+  intervalMonths  Int?
+  tags            String       @default("")
+  competencyId    String?
+  competency      Competency?  @relation(fields: [competencyId], references: [id])
+  assignments     TrainingAssignment[]
+  onboardingTasks OnboardingTask[]
+  events          TrainingEvent[]
+}
+
+model TrainingEvent {
+  id         String   @id @default(cuid())
+  trainingId String
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  startsAt   DateTime
+  location   String   @default("Werk — Schulungsraum")
+  capacity   Int?
+  notes      String   @default("")
+  enrollments TrainingEventEnrollment[]
+}
+
+model TrainingEventEnrollment {
+  id         String        @id @default(cuid())
+  eventId    String
+  event      TrainingEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime      @default(now())
+
+  @@unique([eventId, employeeId])
+}
+
+model EmailOutbox {
+  id        String    @id @default(cuid())
+  toEmail   String
+  subject   String
+  body      String
+  sentAt    DateTime?
+  error     String?
+  createdAt DateTime  @default(now())
+}
+
+model TrainingAssignment {
+  id          String           @id @default(cuid())
+  trainingId  String
+  training    Training         @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  employeeId  String
+  employee    Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  dueDate     DateTime
+  status      AssignmentStatus @default(OPEN)
+  completedAt DateTime?
+  validUntil  DateTime?
+  proofFileName String?
+  proofStoredName String?
+  notes       String           @default("")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([trainingId, employeeId])
+}
+
+model Competency {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  category    String   @default("Allgemein")
+  requirements RoleCompetencyRequirement[]
+  employeeLevels EmployeeCompetency[]
+  trainings   Training[]
+}
+
+model RoleCompetencyRequirement {
+  id           String     @id @default(cuid())
+  jobRoleId    String
+  jobRole      JobRole    @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
+  competencyId String
+  competency   Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  targetLevel  Int
+
+  @@unique([jobRoleId, competencyId])
+}
+
+model EmployeeCompetency {
+  id           String     @id @default(cuid())
+  employeeId   String
+  employee     Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  competencyId String
+  competency   Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  actualLevel  Int        @default(0)
+  confirmedAt  DateTime?
+
+  @@unique([employeeId, competencyId])
+}
+
+model OnboardingTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  jobRoleId String?
+  jobRole   JobRole? @relation(fields: [jobRoleId], references: [id])
+  tasks     OnboardingTask[]
+  instances OnboardingInstance[]
+}
+
+model OnboardingTask {
+  id         String   @id @default(cuid())
+  templateId String
+  template   OnboardingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  title      String
+  sortOrder  Int      @default(0)
+  trainingId String?
+  training   Training? @relation(fields: [trainingId], references: [id])
+  progress   OnboardingTaskProgress[]
+}
+
+model OnboardingInstance {
+  id         String   @id @default(cuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  templateId String
+  template   OnboardingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  startedAt  DateTime @default(now())
+  progress   OnboardingTaskProgress[]
+}
+
+model OnboardingTaskProgress {
+  id         String   @id @default(cuid())
+  instanceId String
+  instance   OnboardingInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  taskId     String
+  task       OnboardingTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  done       Boolean  @default(false)
+  doneAt     DateTime?
+
+  @@unique([instanceId, taskId])
+}
