@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { roleLabel, type SessionUser } from "@/lib/auth";
+import type { SessionUser } from "@/lib/auth";
+import { roleLabel } from "@/lib/roles";
 
 const navForRole = (session: SessionUser) => {
   const common = [{ href: "/dashboard", label: "Übersicht" }];

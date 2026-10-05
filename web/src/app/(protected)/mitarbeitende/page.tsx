@@ -6,9 +6,23 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { UserRole } from "@/generated/prisma/client";
 
-export default async function MitarbeitendePage() {
+export default async function MitarbeitendePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ imported?: string; updated?: string; skipped?: string }>;
+}) {
   const session = await getSession();
   if (!session || session.role !== UserRole.HR_ADMIN) redirect("/dashboard");
+
+  const params = await searchParams;
+  const importMsg =
+    params.imported != null
+      ? `${params.imported} neu, ${params.updated ?? "0"} aktualisiert${
+          params.skipped && Number(params.skipped) > 0
+            ? `, ${params.skipped} Zeilen übersprungen`
+            : ""
+        }`
+      : null;
 
   const employees = await prisma.employee.findMany({
     include: { jobRole: true, manager: true },
@@ -19,7 +33,7 @@ export default async function MitarbeitendePage() {
     <div>
       <PageHeader
         title="Mitarbeitende"
-        description="Stammdaten für ~80 MA — CSV-Import aus Excel (Spalten: email, firstName, lastName, department)."
+        description="Stammdaten für ~80 MA — CSV aus Excel (Spalten: E-Mail, Vorname, Nachname, Abteilung; optional FK E-Mail, Eintritt, Standort)."
         actions={
           <a
             href="/samples/mitarbeitende.csv"
@@ -29,7 +43,17 @@ export default async function MitarbeitendePage() {
           </a>
         }
       />
+      {importMsg ? (
+        <Card className="mb-4 border-emerald-200 bg-emerald-50 text-sm text-emerald-900">
+          Import abgeschlossen: {importMsg}.
+        </Card>
+      ) : null}
       <Card className="mb-6">
+        <p className="mb-3 text-xs text-zinc-600">
+          Unterstützte Spaltennamen (DE/EN): <code>email</code> / <code>E-Mail</code>,{" "}
+          <code>Vorname</code>, <code>Nachname</code>, <code>Abteilung</code>, optional{" "}
+          <code>FK E-Mail</code> / <code>managerEmail</code>.
+        </p>
         <form action={importEmployeesCsv} className="flex flex-wrap items-end gap-3">
           <label className="text-sm font-medium">
             CSV-Import

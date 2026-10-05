@@ -1,5 +1,6 @@
-import { PageHeader, Card, Badge } from "@/components/app-shell";
+import { PageHeader, Card } from "@/components/app-shell";
 import { createTraining } from "./actions";
+import { TrainingCard } from "./training-card";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { UserRole } from "@/generated/prisma/client";
@@ -68,16 +69,7 @@ export default async function SchulungenPage() {
       ) : null}
       <div className="grid gap-3">
         {trainings.map((t) => (
-          <Card key={t.id}>
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="font-semibold">{t.title}</h3>
-              {t.mandatory ? <Badge tone="warn">Pflicht</Badge> : null}
-              <Badge>{t.category}</Badge>
-            </div>
-            <p className="mt-1 text-sm text-zinc-600">
-              Intervall: {t.intervalMonths ?? "—"} Monate · Tags: {t.tags || "—"}
-            </p>
-          </Card>
+          <TrainingCard key={t.id} training={t} canEdit={isHr} />
         ))}
       </div>
     </div>

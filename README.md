@@ -37,4 +37,7 @@ npm run dev
 - Next.js 16 (App Router), TypeScript, Tailwind
 - SQLite (`dev.db`) via Prisma 7 — für Produktion PostgreSQL empfohlen
 
-Projektdokumentation liegt im Cursor Project Context (`docs/`).
+## Projektdokumentation
+
+- **[`project/`](./project/README.md)** — Roadmap, Architektur, Entscheidungen (im Repo)
+- Cursor Project Context (`docs/` im Agent Store) — Anforderungen, IATF-Kontext Knauf Industries

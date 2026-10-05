@@ -84,12 +84,4 @@ export async function getEmployeeScope(session: SessionUser) {
   return { all: false as const, employeeIds: [] as string[] };
 }
 
-export function roleLabel(role: UserRole) {
-  const map: Record<UserRole, string> = {
-    EMPLOYEE: "Mitarbeitende/r",
-    MANAGER: "Führungskraft",
-    HR_ADMIN: "HR-Admin",
-    QM_READONLY: "QM (Lesen)",
-  };
-  return map[role];
-}
+export { roleLabel } from "./roles";

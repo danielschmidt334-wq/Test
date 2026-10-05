@@ -1,7 +1,8 @@
-import { PageHeader, Card } from "@/components/app-shell";
+import { PageHeader, Card, Badge } from "@/components/app-shell";
+import { refreshOverdueStatuses } from "@/lib/assignments";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { UserRole } from "@/generated/prisma/client";
+import { AssignmentStatus, UserRole } from "@/generated/prisma/client";
 import { redirect } from "next/navigation";
 
 export default async function AuditPage({
@@ -18,10 +19,37 @@ export default async function AuditPage({
   }
 
   const params = await searchParams;
-  const [departments, trainings] = await Promise.all([
-    prisma.employee.findMany({ distinct: ["department"], select: { department: true } }),
-    prisma.training.findMany({ orderBy: { title: "asc" } }),
-  ]);
+  await refreshOverdueStatuses();
+
+  const assignmentWhere = {
+    ...(params.trainingId ? { trainingId: params.trainingId } : {}),
+    ...(params.department
+      ? { employee: { department: params.department } }
+      : {}),
+  };
+
+  const [departments, trainings, totalRows, overdueRows, mandatoryOpen] =
+    await Promise.all([
+      prisma.employee.findMany({ distinct: ["department"], select: { department: true } }),
+      prisma.training.findMany({ orderBy: { title: "asc" } }),
+      prisma.trainingAssignment.count({ where: assignmentWhere }),
+      prisma.trainingAssignment.count({
+        where: { ...assignmentWhere, status: AssignmentStatus.OVERDUE },
+      }),
+      prisma.trainingAssignment.count({
+        where: {
+          ...assignmentWhere,
+          training: { mandatory: true },
+          status: {
+            in: [
+              AssignmentStatus.OPEN,
+              AssignmentStatus.IN_PROGRESS,
+              AssignmentStatus.OVERDUE,
+            ],
+          },
+        },
+      }),
+    ]);
 
   const qs = new URLSearchParams();
   if (params.department) qs.set("department", params.department);
@@ -35,8 +63,21 @@ export default async function AuditPage({
         title="Audit-Export"
         description="Gefilterter Schulungsstand und Nachweis-Paket für IATF-/Kundenaudit."
       />
+      <Card className="mb-4">
+        <p className="text-sm text-zinc-700">
+          Vorschau für aktuelle Filter:{" "}
+          <strong>{totalRows}</strong> Zuweisungen ·{" "}
+          <Badge tone={overdueRows > 0 ? "bad" : "ok"}>
+            {overdueRows} überfällig
+          </Badge>{" "}
+          · {mandatoryOpen} offene Pflichtschulungen
+        </p>
+        <p className="mt-2 text-xs text-zinc-500">
+          Tipp: Vor dem Audit ZIP mit Nachweisen laden und Stichprobe gegen CSV prüfen.
+        </p>
+      </Card>
       <Card>
-        <form className="grid gap-3 sm:grid-cols-2" method="get">
+        <form className="grid gap-3 sm:grid-cols-2" method="get" action="/audit">
           <label className="text-sm">
             Abteilung
             <select

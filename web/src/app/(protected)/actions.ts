@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import Papa from "papaparse";
 import { AssignmentStatus, UserRole } from "@/generated/prisma/client";
 import { getSession } from "@/lib/auth";
@@ -25,12 +26,39 @@ export async function importEmployeesCsv(formData: FormData) {
     skipEmptyLines: true,
   });
 
+  let imported = 0;
+  let updated = 0;
+  let skipped = 0;
+
   for (const row of parsed.data) {
-    const email = (row.email ?? row.Email ?? "").trim().toLowerCase();
-    if (!email) continue;
-    const firstName = row.firstName ?? row.Vorname ?? "";
-    const lastName = row.lastName ?? row.Nachname ?? "";
-    const department = row.department ?? row.Abteilung ?? "Allgemein";
+    const email = (row.email ?? row.Email ?? row["E-Mail"] ?? "").trim().toLowerCase();
+    if (!email) {
+      skipped += 1;
+      continue;
+    }
+    const firstName = (row.firstName ?? row.Vorname ?? "").trim();
+    const lastName = (row.lastName ?? row.Nachname ?? "").trim();
+    const department = (row.department ?? row.Abteilung ?? "Allgemein").trim();
+    const managerEmail = (
+      row.managerEmail ??
+      row.ManagerEmail ??
+      row.fkEmail ??
+      row["FK E-Mail"] ??
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+    let managerId: string | undefined;
+    if (managerEmail) {
+      const manager = await prisma.employee.findUnique({
+        where: { email: managerEmail },
+        select: { id: true },
+      });
+      managerId = manager?.id;
+    }
+
+    const existing = await prisma.employee.findUnique({ where: { email } });
     await prisma.employee.upsert({
       where: { email },
       create: {
@@ -40,16 +68,23 @@ export async function importEmployeesCsv(formData: FormData) {
         department,
         startDate: new Date(row.startDate ?? row.Eintritt ?? Date.now()),
         location: row.location ?? row.Standort ?? "Werk",
+        managerId,
       },
       update: {
         firstName,
         lastName,
         department,
+        ...(managerId ? { managerId } : {}),
       },
     });
+    if (existing) updated += 1;
+    else imported += 1;
   }
 
   revalidatePath("/mitarbeitende");
+  redirect(
+    `/mitarbeitende?imported=${imported}&updated=${updated}&skipped=${skipped}`,
+  );
 }
 
 export async function bulkAssignTraining(formData: FormData) {
