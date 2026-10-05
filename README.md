@@ -4,10 +4,29 @@ Web-Prototyp für Pflichtschulungen, Nachweise, Qualimatrix und IATF-Audit-Expor
 
 ## App starten
 
+### Windows (Doppelklick / PowerShell)
+
+Im Repo-Root:
+
+```powershell
+.\setup-windows.ps1
+```
+
+Danach:
+
+```powershell
+cd web
+.\start-dev.ps1
+```
+
+Oder Doppelklick auf `setup-windows.cmd` (einmalig), dann `web\start-dev.ps1`.
+
+### Manuell (alle Plattformen)
+
 ```bash
 cd web
 npm install
-npm run db:setup   # Schema + Demo-Daten (einmalig oder nach DB_RESET)
+npm run db:setup
 npm run dev
 ```
 

@@ -10,7 +10,19 @@
 **Darf nicht** vorkommen: `@prisma/adapter-better-sqlite3` oder `better-sqlite3`  
 → Sonst ist der Code **veraltet** (siehe unten „Neu holen“).
 
-## Start
+## Start (einfach)
+
+Im **Repo-Root** (ein Ordner über `web`):
+
+```powershell
+.\setup-windows.ps1
+cd web
+.\start-dev.ps1
+```
+
+Oder Doppelklick: `setup-windows.cmd` im Repo-Root.
+
+## Start (manuell)
 
 ```powershell
 cd web
