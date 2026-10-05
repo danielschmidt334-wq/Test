@@ -3,11 +3,12 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 import { UserRole } from "@/generated/prisma/client";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { ensurePrismaReady, prisma } from "@/lib/prisma";
 
 const storageDir = path.join(process.cwd(), "storage", "proofs");
 
 export async function POST(request: Request) {
+  await ensurePrismaReady();
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

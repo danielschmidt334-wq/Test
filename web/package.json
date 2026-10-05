@@ -11,6 +11,7 @@
     "db:push": "tsx scripts/db-push.ts",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:setup": "npm run db:push && npm run db:seed",
+    "smoke": "tsx scripts/smoke-auth.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {

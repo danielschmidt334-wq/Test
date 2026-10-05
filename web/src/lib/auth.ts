@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { UserRole } from "@/generated/prisma/client";
-import { prisma } from "./prisma";
+import { ensurePrismaReady, prisma } from "./prisma";
 
 const secret = new TextEncoder().encode(
   process.env.AUTH_SECRET ?? "dev-secret-change-in-production-knauf",
@@ -67,6 +67,7 @@ export async function requireSession(roles?: UserRole[]) {
 }
 
 export async function getEmployeeScope(session: SessionUser) {
+  await ensurePrismaReady();
   if (session.role === UserRole.HR_ADMIN || session.role === UserRole.QM_READONLY) {
     return { all: true as const };
   }

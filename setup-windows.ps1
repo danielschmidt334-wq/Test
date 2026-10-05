@@ -28,6 +28,10 @@ if ($env:DB_RESET -eq "1") {
 
 $env:PGLITE_DATA_DIR = (Join-Path $Web ".pglite")
 Write-Host "==> PGLITE_DATA_DIR=$env:PGLITE_DATA_DIR"
+@"
+PGLITE_DATA_DIR=$($env:PGLITE_DATA_DIR)
+AUTH_SECRET=dev-secret-change-in-production-knauf
+"@ | Set-Content -Encoding utf8 (Join-Path $Web ".env")
 
 Write-Host "==> npm install..."
 npm install

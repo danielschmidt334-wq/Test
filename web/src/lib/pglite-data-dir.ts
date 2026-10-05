@@ -10,5 +10,5 @@ export function resolvePgliteDataDir(): string {
   if (path.isAbsolute(raw)) {
     return path.normalize(raw);
   }
-  return path.resolve(process.cwd(), raw);
+  return path.resolve(/* turbopackIgnore: true */ process.cwd(), raw);
 }

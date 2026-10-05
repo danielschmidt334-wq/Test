@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 import { UserRole } from "@/generated/prisma/client";
 import { getSession } from "@/lib/auth";
 import { refreshOverdueStatuses } from "@/lib/assignments";
-import { prisma } from "@/lib/prisma";
+import { ensurePrismaReady, prisma } from "@/lib/prisma";
 import { assignmentStatusLabel, csvEscape, formatDate } from "@/lib/utils";
 
 const storageDir = path.join(process.cwd(), "storage", "proofs");
@@ -35,6 +35,7 @@ async function fetchRows(department?: string, trainingId?: string) {
 }
 
 export async function GET(request: Request) {
+  await ensurePrismaReady();
   const session = await getSession();
   if (
     !session ||

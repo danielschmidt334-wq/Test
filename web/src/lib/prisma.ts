@@ -1,11 +1,12 @@
+import "dotenv/config";
 import { PGlite } from "@electric-sql/pglite";
 import { PrismaPGlite } from "pglite-prisma-adapter";
 import { PrismaClient } from "@/generated/prisma/client";
 import { resolvePgliteDataDir } from "./pglite-data-dir";
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient;
-  pglite: PGlite;
+  prisma: PrismaClient | undefined;
+  pglite: PGlite | undefined;
   pgliteReady: Promise<void> | undefined;
 };
 
@@ -14,7 +15,7 @@ function createPglite(): PGlite {
   return new PGlite({ dataDir });
 }
 
-function createClient() {
+function createClient(): PrismaClient {
   const pglite = globalForPrisma.pglite ?? createPglite();
   if (!globalForPrisma.pglite) {
     globalForPrisma.pglite = pglite;
@@ -24,14 +25,25 @@ function createClient() {
   return new PrismaClient({ adapter });
 }
 
-export const prisma = globalForPrisma.prisma ?? createClient();
+function getPrisma(): PrismaClient {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = createClient();
+  }
+  return globalForPrisma.prisma;
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export const prisma = getPrisma();
 
 export async function ensurePrismaReady() {
+  if (!globalForPrisma.pglite) {
+    getPrisma();
+  }
   if (globalForPrisma.pgliteReady) {
     await globalForPrisma.pgliteReady;
   }
 }
 
-export { createClient as createPrismaClient };
+/** Immer dieselbe Instanz (wichtig für PGlite-Dateisperre). */
+export function createPrismaClient(): PrismaClient {
+  return getPrisma();
+}
