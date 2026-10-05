@@ -1,12 +1,7 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs/promises";
-import path from "node:path";
 import { PGlite } from "@electric-sql/pglite";
-
-function dataDir() {
-  const raw = process.env.PGLITE_DATA_DIR ?? ".pglite";
-  return path.isAbsolute(raw) ? raw : path.join(process.cwd(), raw);
-}
+import { resolvePgliteDataDir } from "../src/lib/pglite-data-dir";
 
 async function hasSchema(db: PGlite) {
   const res = await db.query<{ exists: boolean }>(
@@ -19,14 +14,14 @@ async function hasSchema(db: PGlite) {
 }
 
 async function main() {
-  const dir = dataDir();
+  const dir = resolvePgliteDataDir();
   const reset = process.env.DB_RESET === "1";
 
   if (reset) {
     await fs.rm(dir, { recursive: true, force: true });
   }
 
-  const db = new PGlite(dir);
+  const db = new PGlite({ dataDir: dir });
   if (!reset && (await hasSchema(db))) {
     console.log(
       "Datenbankschema in .pglite ist bereits vorhanden. Für Neuaufbau: DB_RESET=1 npm run db:push",

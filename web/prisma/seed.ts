@@ -5,11 +5,12 @@ import {
   TrainingType,
   UserRole,
 } from "../src/generated/prisma/client";
-import { createPrismaClient } from "../src/lib/prisma";
+import { createPrismaClient, ensurePrismaReady } from "../src/lib/prisma";
 
 const prisma = createPrismaClient();
 
 async function main() {
+  await ensurePrismaReady();
   await prisma.onboardingTaskProgress.deleteMany();
   await prisma.onboardingInstance.deleteMany();
   await prisma.onboardingTask.deleteMany();

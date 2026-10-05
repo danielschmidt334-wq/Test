@@ -26,6 +26,9 @@ if ($env:DB_RESET -eq "1") {
   Remove-Item -Recurse -Force .pglite -ErrorAction SilentlyContinue
 }
 
+$env:PGLITE_DATA_DIR = (Join-Path $Web ".pglite")
+Write-Host "==> PGLITE_DATA_DIR=$env:PGLITE_DATA_DIR"
+
 Write-Host "==> npm install..."
 npm install
 

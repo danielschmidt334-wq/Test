@@ -22,6 +22,8 @@ cd web
 
 Oder Doppelklick: `setup-windows.cmd` im Repo-Root.
 
+Nach Update: Ordner `web\.next` löschen und `.\setup-windows.ps1` erneut (Dev nutzt **Webpack**, nicht Turbopack — PGlite-Kompatibilität).
+
 ## Start (manuell)
 
 ```powershell
