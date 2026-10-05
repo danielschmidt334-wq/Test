@@ -40,4 +40,5 @@ npm run dev
 ## Projektdokumentation
 
 - **[`project/`](./project/README.md)** — Roadmap, Architektur, Entscheidungen (im Repo)
+- **[Lokal starten / Windows-Fehler](./project/entwicklung-lokal.md)** — `better-sqlite3`, Node-Version
 - Cursor Project Context (`docs/` im Agent Store) — Anforderungen, IATF-Kontext Knauf Industries

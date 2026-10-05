@@ -10,6 +10,7 @@ Dieser Ordner bündelt **Zweck, Planung und Architektur** für das Knauf-Industr
 | [roadmap.md](./roadmap.md) | Nächste Schritte (V2, IATF) |
 | [architektur.md](./architektur.md) | Stack und Module |
 | [entscheidungen/](./entscheidungen/) | Kurzentscheidungen (ADR-light) |
+| [entwicklung-lokal.md](./entwicklung-lokal.md) | Start unter Windows/macOS, SQLite-Fehler beheben |
 
 ## Haupt-App-Linie
 
