@@ -9,11 +9,14 @@ export default async function BerichtePage() {
   const session = await getSession();
   if (!session || session.role !== UserRole.HR_ADMIN) redirect("/dashboard");
 
-  const byDept = await prisma.trainingAssignment.groupBy({
+  const [pendingEmails, byDept] = await Promise.all([
+    prisma.emailOutbox.count({ where: { sentAt: null } }),
+    prisma.trainingAssignment.groupBy({
     by: ["status"],
     _count: { _all: true },
     where: { status: AssignmentStatus.OVERDUE },
-  });
+    }),
+  ]);
 
   const deptRows = await prisma.$queryRaw<
     { department: string; overdue: number }[]
@@ -43,8 +46,8 @@ export default async function BerichtePage() {
         }
       />
       <p className="mb-4 text-sm text-zinc-600">
-        Wartung: abgelaufene Pflichtschulungen erneut öffnen und In-App-Erinnerungen
-        (MA + FK bei Überfälligkeit) erzeugen.
+        Wartung: Erneuerungen, In-App-Erinnerungen und E-Mail-Outbox (Dev:{" "}
+        <code>web/storage/emails/</code>). Ausstehende E-Mails: {pendingEmails}.
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
