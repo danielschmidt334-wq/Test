@@ -1,0 +1,78 @@
+/** @type {Array<{ id: number, tag: string, question: string, options: string[], correct: number }>} */
+window.QUIZ_QUESTIONS = [
+  {
+    id: 1,
+    tag: "Grammar · Present Simple",
+    question: "She ___ to school every day.",
+    options: ["go", "goes", "going", "is go"],
+    correct: 1,
+  },
+  {
+    id: 2,
+    tag: "Grammar · Past Simple",
+    question: "We ___ a great film yesterday.",
+    options: ["see", "saw", "seen", "seeing"],
+    correct: 1,
+  },
+  {
+    id: 3,
+    tag: "Grammar · Articles",
+    question: "Can I have ___ apple, please?",
+    options: ["a", "an", "the", "—"],
+    correct: 1,
+  },
+  {
+    id: 4,
+    tag: "Vocabulary",
+    question: "The opposite of «expensive» is …",
+    options: ["cheap", "heavy", "early", "quiet"],
+    correct: 0,
+  },
+  {
+    id: 5,
+    tag: "Grammar · Present Continuous",
+    question: "Listen! The baby ___.",
+    options: ["cries", "is crying", "cry", "cried"],
+    correct: 1,
+  },
+  {
+    id: 6,
+    tag: "Vocabulary",
+    question: "You use a ___ to cut paper.",
+    options: ["ruler", "scissors", "eraser", "glue"],
+    correct: 1,
+  },
+  {
+    id: 7,
+    tag: "Grammar · Prepositions",
+    question: "The cat is ___ the table.",
+    options: ["in", "at", "under", "between"],
+    correct: 2,
+  },
+  {
+    id: 8,
+    tag: "Grammar · Plural",
+    question: "Which word is correct?",
+    options: ["childs", "children", "childes", "childrens"],
+    correct: 1,
+  },
+  {
+    id: 9,
+    tag: "Vocabulary",
+    question: "«To borrow» means you …",
+    options: [
+      "give something for a short time",
+      "take something for a short time and return it",
+      "buy something cheaply",
+      "lose something",
+    ],
+    correct: 1,
+  },
+  {
+    id: 10,
+    tag: "Grammar · Questions",
+    question: "___ you like pizza?",
+    options: ["Do", "Does", "Are", "Is"],
+    correct: 0,
+  },
+];
