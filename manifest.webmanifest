@@ -1,0 +1,10 @@
+{
+  "name": "English Quick Check",
+  "short_name": "English Quiz",
+  "description": "Mobiler Grammatik- und Wortschatztest für Englisch",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f1eb",
+  "theme_color": "#1e3a5f",
+  "lang": "de"
+}

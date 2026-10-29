@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1e3a5f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>English Quiz — Schnelltest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="header">
+      <div class="header-badge">English</div>
+      <h1 class="header-title">Quick Check</h1>
+      <p class="header-sub">Grammatik &amp; Wortschatz · ca. 5 Minuten</p>
+    </header>
+
+    <main class="main">
+      <!-- Start -->
+      <section class="screen screen--active" id="screen-start" aria-labelledby="start-heading">
+        <h2 id="start-heading" class="screen-title">Willkommen</h2>
+        <p class="lead">
+          Beantworte <strong>10 Fragen</strong> auf Englisch. Am Ende siehst du deine Punktzahl und welche Antworten richtig waren.
+        </p>
+        <label class="field">
+          <span class="field-label">Dein Name (optional)</span>
+          <input type="text" id="student-name" class="field-input" autocomplete="name" placeholder="z. B. Anna" maxlength="40" />
+        </label>
+        <button type="button" class="btn btn--primary btn--block" id="btn-start">Test starten</button>
+      </section>
+
+      <!-- Quiz -->
+      <section class="screen" id="screen-quiz" aria-live="polite">
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span id="progress-label">Frage 1 von 10</span>
+            <span id="progress-pct">0%</span>
+          </div>
+          <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+        <p class="question-tag" id="question-tag">Grammar</p>
+        <h2 class="question-text" id="question-text"></h2>
+        <ul class="choices" id="choices" role="listbox"></ul>
+        <button type="button" class="btn btn--primary btn--block" id="btn-next" disabled>Nächste Frage</button>
+      </section>
+
+      <!-- Results -->
+      <section class="screen" id="screen-results">
+        <div class="score-card" id="score-card">
+          <p class="score-label">Dein Ergebnis</p>
+          <p class="score-value" id="score-value">0 / 10</p>
+          <p class="score-message" id="score-message"></p>
+        </div>
+        <div class="results-list" id="results-list"></div>
+        <button type="button" class="btn btn--secondary btn--block" id="btn-retry">Noch einmal</button>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Englisch · Mobile Quiz</p>
+    </footer>
+  </div>
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
